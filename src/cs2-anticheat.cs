@@ -1,0 +1,339 @@
+﻿using CounterStrikeSharp.API;
+using CounterStrikeSharp.API.Core;
+using CounterStrikeSharp.API.Core.Attributes.Registration;
+using CounterStrikeSharp.API.Modules.Admin;
+using CounterStrikeSharp.API.Modules.Memory.DynamicFunctions;
+using CounterStrikeSharp.API.Modules.Utils;
+using CounterStrikeSharp.API.ValveConstants.Protobuf;
+using static AntiCheat.Hook_ProcessUsercmds;
+using Vector = CounterStrikeSharp.API.Modules.Utils.Vector;
+
+namespace AntiCheat;
+
+public class AntiCheat : BasePlugin, IPluginConfig<Config>
+{
+    public override string ModuleName => "AntiCheat";
+    public override string ModuleVersion => "1.1";
+    public override string ModuleAuthor => "schwarper";
+
+    public static AntiCheat Instance { get; set; } = new();
+    public Config Config { get; set; } = new Config();
+    public ResultType ResultType { get; set; }
+    private readonly Dictionary<ulong, PlayerData> _playerData = [];
+    private readonly Dictionary<CheatType, ICheatDetector> _detectors = [];
+
+    private readonly HashSet<CheatType> CheatTypesOnProcessUsercmds = [
+        CheatType.Scroll,
+        CheatType.SilentAim,
+        CheatType.Spinbot,
+        CheatType.Teleport,
+        CheatType.AntiDuck,
+        CheatType.Wallhack,
+    ];
+
+    public override void Load(bool hotReload)
+    {
+        Instance = this;
+
+        foreach (ICheatDetector detector in _detectors.Values)
+        {
+            detector.Load();
+        }
+
+        foreach (CheatType cheatType in CheatTypesOnProcessUsercmds)
+        {
+            if (_detectors.TryGetValue(cheatType, out ICheatDetector? detector))
+            {
+                ProcessUsercmds.Hook(OnProcessUsercmds, HookMode.Post);
+                break;
+            }
+        }
+
+        if (hotReload)
+        {
+            List<CCSPlayerController> players = Utilities.GetPlayers();
+            foreach (CCSPlayerController player in players)
+            {
+                _playerData[player.SteamID] = new PlayerData();
+            }
+        }
+    }
+
+    public override void Unload(bool hotReload)
+    {
+        foreach (ICheatDetector detector in _detectors.Values)
+        {
+            detector.Unload();
+        }
+
+        foreach (CheatType cheatType in CheatTypesOnProcessUsercmds)
+        {
+            if (_detectors.TryGetValue(cheatType, out ICheatDetector? detector))
+            {
+                ProcessUsercmds.Unhook(OnProcessUsercmds, HookMode.Post);
+                break;
+            }
+        }
+    }
+
+    public void OnConfigParsed(Config config)
+    {
+        Config = config;
+
+        _detectors.Clear();
+
+        if (Config.Modules.AntiDLL.Enabled)
+            _detectors[CheatType.Event] = new AntiDLL();
+
+        if (Config.Modules.RapidFire.Enabled)
+            _detectors[CheatType.RapidFire] = new RapidFireDetector();
+
+        if (Config.Modules.BunnyHop.Enabled)
+            _detectors[CheatType.Scroll] = new BunnyHopDetector();
+
+        if (Config.Modules.SilentAim.Enabled)
+            _detectors[CheatType.SilentAim] = new SilentAimDetector();
+
+        if (Config.Modules.Spinbot.Enabled)
+            _detectors[CheatType.Spinbot] = new SpinbotDetector();
+
+        if (Config.Modules.Teleport.Enabled)
+            _detectors[CheatType.Teleport] = new TeleportDetector();
+
+        if (Config.Modules.Wallhack.Enabled)
+            _detectors[CheatType.Wallhack] = new WallhackDetector();
+
+        if (Config.Modules.AntiDuck.Enabled)
+            _detectors[CheatType.AntiDuck] = new AntiDuckDetector();
+
+        ResultType = Config.Type switch
+        {
+            "PrintAll" => ResultType.PrintAll,
+            "PrintAdmin" => ResultType.PrintAdmin,
+            "Kick" => ResultType.Kick,
+            "Ban" => ResultType.Ban,
+            _ => ResultType.PrintAdmin
+        };
+    }
+
+    [GameEventHandler]
+    public HookResult OnPlayerConnect(EventPlayerConnectFull @event, GameEventInfo info)
+    {
+        if (@event.Userid is not { } player)
+            return HookResult.Continue;
+
+        _playerData[player.SteamID] = new PlayerData();
+        return HookResult.Continue;
+    }
+
+    [GameEventHandler]
+    public HookResult OnPlayerDisconnect(EventPlayerDisconnect @event, GameEventInfo info)
+    {
+        if (@event.Userid is not { } player)
+            return HookResult.Continue;
+
+        _playerData.Remove(player.SteamID);
+        return HookResult.Continue;
+    }
+
+    [GameEventHandler]
+    public HookResult OnPlayerDeath(EventPlayerDeath @event, GameEventInfo info)
+    {
+        if (@event.Userid is not CCSPlayerController victim ||
+            @event.Attacker is not CCSPlayerController attacker ||
+            victim == attacker)
+            return HookResult.Continue;
+
+        if (_detectors.TryGetValue(CheatType.Spinbot, out ICheatDetector? spinbotDetector))
+            spinbotDetector.OnPlayerDeath(victim, attacker);
+        else if (_detectors.TryGetValue(CheatType.SilentAim, out ICheatDetector? silentDetector))
+            silentDetector.OnPlayerDeath(victim, attacker);
+
+        return HookResult.Continue;
+    }
+
+    [GameEventHandler]
+    public HookResult OnWeaponFire(EventWeaponFire @event, GameEventInfo info)
+    {
+        if (_detectors.TryGetValue(CheatType.RapidFire, out ICheatDetector? rapidDetector))
+            rapidDetector.OnWeaponFire(@event);
+
+        return HookResult.Continue;
+    }
+
+    public HookResult OnProcessUsercmds(DynamicHook hook)
+    {
+        CCSPlayerController player = hook.GetParam<CCSPlayerController>(0);
+        CUserCmd userCmd = new(hook.GetParam<IntPtr>(1));
+        QAngle? angle = userCmd.GetViewAngles();
+
+        if (angle == null)
+            return HookResult.Continue;
+
+        foreach (CheatType cheatType in CheatTypesOnProcessUsercmds)
+        {
+            if (_detectors.TryGetValue(cheatType, out ICheatDetector? detector))
+            {
+                if (cheatType == CheatType.Teleport)
+                    detector.OnProcessUsercmds(player, angle);
+                else
+                    detector.OnProcessUsercmds(player, new QAngle(angle.X, angle.Y, angle.Z));
+            }
+        }
+
+        return HookResult.Continue;
+    }
+
+    public void OnPlayerDetected(CCSPlayerController player, CheatType cheatType)
+    {
+        string message = @$"{ChatColors.White}{ChatColors.Red}[AC] {ChatColors.Grey}Suspicious behavior detected: 
+            {ChatColors.LightPurple}{player.PlayerName} {ChatColors.Grey}({cheatType})";
+
+        if (!string.IsNullOrEmpty(Config.DiscordWebhook))
+            Task.Run(async () => await DiscordNotifier.SendDiscordAsync(message));
+
+        switch (ResultType)
+        {
+            case ResultType.PrintAll:
+                Server.PrintToChatAll(message);
+                break;
+            case ResultType.PrintAdmin:
+                List<CCSPlayerController> players = Utilities.GetPlayers();
+                foreach (CCSPlayerController admin in players)
+                {
+                    if (!AdminManager.PlayerHasPermissions(admin, "@css/ban"))
+                        continue;
+
+                    admin.PrintToChat(message);
+                }
+                break;
+            case ResultType.Kick:
+            case ResultType.Ban:
+                // TO DO ADD BAN
+                player.Disconnect(NetworkDisconnectionReason.NETWORK_DISCONNECT_REJECT_BANNED);
+                break;
+        }
+    }
+
+    public PlayerData? GetPlayerData(CCSPlayerController player)
+    {
+        return _playerData.TryGetValue(player.SteamID, out PlayerData? data) ? data : null;
+    }
+}
+
+public enum ResultType
+{
+    PrintAll,
+    PrintAdmin,
+    Kick,
+    Ban
+}
+
+public enum CheatType
+{
+    Event,
+    Scroll,
+    SilentAim,
+    Spinbot,
+    Wallhack,
+    RapidFire,
+    Teleport,
+    AntiDuck
+}
+
+public class PlayerData
+{
+    public AntiDLLData AntiDLL { get; } = new();
+    public BunnyHopData BunnyHop { get; } = new();
+    public SilentAimData SilentAim { get; } = new();
+    public SpinbotData Spinbot { get; } = new();
+    public WallhackData Wallhack { get; } = new();
+    public TeleportData Teleport { get; } = new();
+    public RapidFireData RapidFire { get; } = new();
+    public AntiDuckData AntiDuck { get; } = new();
+}
+
+public class AntiDLLData
+{
+    public double LastTickCount;
+}
+
+public class BunnyHopData
+{
+    public List<JumpStats> JumpStats { get; } = [];
+    public int GroundTicks { get; set; }
+    public int ReleaseTick { get; set; }
+    public int AirTicks { get; set; }
+    public bool PreviousGround { get; set; } = true;
+    public PlayerButtons PreviousButtons { get; set; }
+    public int CurrentJump { get; set; }
+    public int[] TempStats { get; } = new int[5];
+}
+
+public class JumpStats
+{
+    public int Scrolls { get; set; }
+    public int BeforeGround { get; set; }
+    public int AfterGround { get; set; }
+    public int AverageTicks { get; set; }
+    public bool PerfectJump { get; set; }
+}
+
+public class SilentAimData
+{
+    public CCSPlayerController? Victim;
+    public bool RecentlyKilled;
+    public int SuspicionCount;
+}
+
+public class SpinbotData
+{
+    public QAngle LastAngle = new();
+    public double LastTickCount;
+    public bool RecentlyKilled;
+    public int SuspicionCount;
+}
+
+public class WallhackData
+{
+    public QAngle? LastAngle;
+    public Vector? Mins = new();
+    public Vector? Maxs = new();
+}
+
+public class TeleportData
+{
+    public double LastTickCount;
+    public int SuspicionCount;
+}
+
+public class RapidFireData
+{
+    public int LastShotTick;
+    public int SuspicionCount;
+}
+
+public class AntiDuckData
+{
+    public int LastTickCount;
+    public int SuspicionCount;
+}
+
+public enum State
+{
+    Nothing,
+    Landing,
+    Jumping,
+    Pressing,
+    Releasing
+}
+
+public enum Stats
+{
+    Scrolls,
+    BeforeGround,
+    AfterGround,
+    AverageTicks,
+    PerfectJump,
+    Size
+}
