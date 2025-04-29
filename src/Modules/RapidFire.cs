@@ -1,4 +1,4 @@
-using CounterStrikeSharp.API;
+﻿using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Modules.Utils;
 using static AntiCheat.AntiCheat;
@@ -24,15 +24,15 @@ public class RapidFireDetector : ICheatDetector
 
         int tick = Server.TickCount;
 
-        if (tick - data.LastShotTick > weaponData.CycleTime.Values[0] * 64)
-            return;
-
-        data.SuspicionCount++;
-
-        if (data.SuspicionCount >= Instance.Config.Modules.RapidFire.MaxSuspicion)
+        if (tick - data.LastShotTick < weaponData.CycleTime.Values[0] * 32)
         {
-            Instance.OnPlayerDetected(player, CheatType.RapidFire);
-            data.SuspicionCount = 0;
+            data.SuspicionCount++;
+
+            if (data.SuspicionCount >= Instance.Config.Modules.RapidFire.MaxSuspicion)
+            {
+                Instance.OnPlayerDetected(player, CheatType.RapidFire);
+                data.SuspicionCount = 0;
+            }
         }
 
         data.LastShotTick = Server.TickCount;

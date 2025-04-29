@@ -59,9 +59,7 @@ public class AntiDLL : ICheatDetector
             data.LastTickCount = tick + 5.0f;
         }
 
-        List<string> blacklist = Instance.Config.Modules.AntiDLL.Blacklist
-            .Where(eventName => _gameEventManager.FindListener(pClientProxyListener, eventName))
-            .ToList();
+        List<string> blacklist = [.. Instance.Config.Modules.AntiDLL.Blacklist.Where(eventName => _gameEventManager.FindListener(pClientProxyListener, eventName))];
 
         if (blacklist.Count > 0)
         {

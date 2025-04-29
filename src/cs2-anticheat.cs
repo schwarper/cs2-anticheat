@@ -16,7 +16,7 @@ namespace AntiCheat;
 public class AntiCheat : BasePlugin, IPluginConfig<Config>
 {
     public override string ModuleName => "AntiCheat";
-    public override string ModuleVersion => "1.2";
+    public override string ModuleVersion => "1.3";
     public override string ModuleAuthor => "schwarper";
 
     public static AntiCheat Instance { get; set; } = new();
@@ -30,7 +30,6 @@ public class AntiCheat : BasePlugin, IPluginConfig<Config>
         CheatType.SilentAim,
         CheatType.Spinbot,
         CheatType.Teleport,
-        CheatType.AntiDuck,
         CheatType.Wallhack,
     ];
 
@@ -108,9 +107,6 @@ public class AntiCheat : BasePlugin, IPluginConfig<Config>
         if (Config.Modules.Wallhack.Enabled)
             _detectors[CheatType.Wallhack] = new WallhackDetector();
 
-        if (Config.Modules.AntiDuck.Enabled)
-            _detectors[CheatType.AntiDuck] = new AntiDuckDetector();
-
         ResultType = Config.Type switch
         {
             "PrintAll" => ResultType.PrintAll,
@@ -151,7 +147,7 @@ public class AntiCheat : BasePlugin, IPluginConfig<Config>
 
         if (_detectors.TryGetValue(CheatType.Spinbot, out ICheatDetector? spinbotDetector))
             spinbotDetector.OnPlayerDeath(victim, attacker);
-        else if (_detectors.TryGetValue(CheatType.SilentAim, out ICheatDetector? silentDetector))
+        if (_detectors.TryGetValue(CheatType.SilentAim, out ICheatDetector? silentDetector))
             silentDetector.OnPlayerDeath(victim, attacker);
 
         return HookResult.Continue;
@@ -199,6 +195,7 @@ public class AntiCheat : BasePlugin, IPluginConfig<Config>
         if (!string.IsNullOrWhiteSpace(Config.DiscordWebhook))
         {
             StringBuilder messageBuilder = new StringBuilder()
+                .AppendLine("```")
                 .AppendLine($"Server IP: {GetServerIP()}")
                 .AppendLine($"Player: {player.PlayerName}")
                 .AppendLine($"SteamID: {player.SteamID}")
@@ -209,23 +206,28 @@ public class AntiCheat : BasePlugin, IPluginConfig<Config>
                 messageBuilder.AppendLine($"Details: {detail}");
             }
 
+            messageBuilder.AppendLine("```");
+
             _ = Task.Run(() => DiscordNotifier.SendDiscordAsync(messageBuilder.ToString()));
         }
 
-        switch (ResultType)
+        Server.NextWorldUpdate(() =>
         {
-            case ResultType.PrintAll:
-                PrintToChatAll(cheatType, detail, false);
-                break;
-            case ResultType.PrintAdmin:
-                PrintToChatAll(cheatType, detail, true);
-                break;
-            case ResultType.Kick:
-            case ResultType.Ban:
-                // TO DO ADD BAN
-                player.Disconnect(NetworkDisconnectionReason.NETWORK_DISCONNECT_REJECT_BANNED);
-                break;
-        }
+            switch (ResultType)
+            {
+                case ResultType.PrintAll:
+                    PrintToChatAll(player.PlayerName, cheatType, detail, false);
+                    break;
+                case ResultType.PrintAdmin:
+                    PrintToChatAll(player.PlayerName, cheatType, detail, true);
+                    break;
+                case ResultType.Kick:
+                case ResultType.Ban:
+                    // TO DO ADD BAN
+                    player.Disconnect(NetworkDisconnectionReason.NETWORK_DISCONNECT_REJECT_BANNED);
+                    break;
+            }
+        });
     }
 
     public PlayerData? GetPlayerData(CCSPlayerController player)
@@ -233,17 +235,23 @@ public class AntiCheat : BasePlugin, IPluginConfig<Config>
         return _playerData.TryGetValue(player.SteamID, out PlayerData? data) ? data : null;
     }
 
-    public static void PrintToChatAll(CheatType cheatType, string detail, bool onlyAdmin)
+    public static void PrintToChatAll(string playername, CheatType cheatType, string detail, bool onlyAdmin = false)
     {
         List<CCSPlayerController> players = Utilities.GetPlayers();
         foreach (CCSPlayerController player in players)
         {
             if (player.IsBot)
+            {
                 continue;
-            if (onlyAdmin && !AdminManager.PlayerHasPermissions(player, "@css/ban"))
-                continue;
+            }
 
-            player.PrintToChat(Instance.Localizer.ForPlayer(player, "Suspicious behavior detected", player.PlayerName, cheatType, detail));
+            if (onlyAdmin && !AdminManager.PlayerHasPermissions(player, "@css/ban"))
+            {
+                Server.PrintToChatAll($"OnlyAdmin->{onlyAdmin} && {player.PlayerName}");
+                continue;
+            }
+
+            player.PrintToChat(Instance.Localizer.ForPlayer(player, "Suspicious behavior detected", playername, cheatType, detail));
         }
     }
 
@@ -286,8 +294,7 @@ public enum CheatType
     Spinbot,
     Wallhack,
     RapidFire,
-    Teleport,
-    AntiDuck
+    Teleport
 }
 
 public class PlayerData
@@ -299,7 +306,6 @@ public class PlayerData
     public WallhackData Wallhack { get; } = new();
     public TeleportData Teleport { get; } = new();
     public RapidFireData RapidFire { get; } = new();
-    public AntiDuckData AntiDuck { get; } = new();
 }
 
 public class AntiDLLData
@@ -359,12 +365,6 @@ public class TeleportData
 public class RapidFireData
 {
     public int LastShotTick;
-    public int SuspicionCount;
-}
-
-public class AntiDuckData
-{
-    public int LastTickCount;
     public int SuspicionCount;
 }
 

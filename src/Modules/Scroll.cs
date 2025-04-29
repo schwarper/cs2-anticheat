@@ -37,8 +37,6 @@ public class BunnyHopDetector : ICheatDetector
         Vector velocity = playerPawn.AbsVelocity;
         float speed = (float)Math.Sqrt(velocity.X * velocity.X + velocity.Y * velocity.Y);
 
-        CollectJumpStats(player, data, onGround, buttons, velocity.Z);
-
         if (speed > 225.0f)
             CollectJumpStats(player, data, onGround, buttons, velocity.Z);
         else

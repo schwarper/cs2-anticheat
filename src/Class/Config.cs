@@ -18,7 +18,6 @@ public class Config : BasePluginConfig
         [JsonPropertyName("Spinbot")] public SpinbotConfig Spinbot { get; set; } = new();
         [JsonPropertyName("Teleport")] public TeleportConfig Teleport { get; set; } = new();
         [JsonPropertyName("Wallhack")] public WallhackConfig Wallhack { get; set; } = new();
-        [JsonPropertyName("AntiDuck")] public AntiDuckConfig AntiDuck { get; set; } = new();
         [JsonPropertyName("AntiDLL")] public AntiDLLConfig AntiDLL { get; set; } = new();
     }
 
@@ -59,12 +58,6 @@ public class Config : BasePluginConfig
     public class WallhackConfig
     {
         [JsonPropertyName("Enabled")] public bool Enabled { get; set; } = false;
-    }
-
-    public class AntiDuckConfig
-    {
-        [JsonPropertyName("Enabled")] public bool Enabled { get; set; } = false;
-        [JsonPropertyName("MaxSuspicion")] public int MaxSuspicion { get; set; } = 5;
     }
 
     public class AntiDLLConfig
