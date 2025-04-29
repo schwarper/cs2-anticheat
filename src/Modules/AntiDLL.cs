@@ -59,11 +59,14 @@ public class AntiDLL : ICheatDetector
             data.LastTickCount = tick + 5.0f;
         }
 
-        bool hasBlacklisted = Instance.Config.Modules.AntiDLL.Blacklist.Any(eventName => _gameEventManager.FindListener(pClientProxyListener, eventName));
+        List<string> blacklist = Instance.Config.Modules.AntiDLL.Blacklist
+            .Where(eventName => _gameEventManager.FindListener(pClientProxyListener, eventName))
+            .ToList();
 
-        if (hasBlacklisted)
+        if (blacklist.Count > 0)
         {
-            Instance.OnPlayerDetected(player, CheatType.Event);
+            string detail = string.Join(", ", blacklist);
+            Instance.OnPlayerDetected(player, CheatType.Event, detail);
         }
 
         return HookResult.Continue;

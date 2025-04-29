@@ -1,10 +1,13 @@
 ﻿using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Core.Attributes.Registration;
+using CounterStrikeSharp.API.Core.Translations;
 using CounterStrikeSharp.API.Modules.Admin;
 using CounterStrikeSharp.API.Modules.Memory.DynamicFunctions;
 using CounterStrikeSharp.API.Modules.Utils;
 using CounterStrikeSharp.API.ValveConstants.Protobuf;
+using System.Runtime.InteropServices;
+using System.Text;
 using static AntiCheat.Hook_ProcessUsercmds;
 using Vector = CounterStrikeSharp.API.Modules.Utils.Vector;
 
@@ -13,7 +16,7 @@ namespace AntiCheat;
 public class AntiCheat : BasePlugin, IPluginConfig<Config>
 {
     public override string ModuleName => "AntiCheat";
-    public override string ModuleVersion => "1.1";
+    public override string ModuleVersion => "1.2";
     public override string ModuleAuthor => "schwarper";
 
     public static AntiCheat Instance { get; set; } = new();
@@ -79,6 +82,8 @@ public class AntiCheat : BasePlugin, IPluginConfig<Config>
     public void OnConfigParsed(Config config)
     {
         Config = config;
+
+        Config.Tag = Config.Tag.ReplaceColorTags();
 
         _detectors.Clear();
 
@@ -184,28 +189,36 @@ public class AntiCheat : BasePlugin, IPluginConfig<Config>
         return HookResult.Continue;
     }
 
-    public void OnPlayerDetected(CCSPlayerController player, CheatType cheatType)
+    public void OnPlayerDetected(CCSPlayerController player, CheatType cheatType, string detail = "")
     {
-        string message = @$"{ChatColors.White}{ChatColors.Red}[AC] {ChatColors.Grey}Suspicious behavior detected: 
-            {ChatColors.LightPurple}{player.PlayerName} {ChatColors.Grey}({cheatType})";
+        if (!string.IsNullOrEmpty(detail))
+        {
+            detail = $" ({detail})";
+        }
 
-        if (!string.IsNullOrEmpty(Config.DiscordWebhook))
-            Task.Run(async () => await DiscordNotifier.SendDiscordAsync(message));
+        if (!string.IsNullOrWhiteSpace(Config.DiscordWebhook))
+        {
+            StringBuilder messageBuilder = new StringBuilder()
+                .AppendLine($"Server IP: {GetServerIP()}")
+                .AppendLine($"Player: {player.PlayerName}")
+                .AppendLine($"SteamID: {player.SteamID}")
+                .AppendLine($"Cheat Type: {cheatType}");
+
+            if (!string.IsNullOrWhiteSpace(detail))
+            {
+                messageBuilder.AppendLine($"Details: {detail}");
+            }
+
+            _ = Task.Run(() => DiscordNotifier.SendDiscordAsync(messageBuilder.ToString()));
+        }
 
         switch (ResultType)
         {
             case ResultType.PrintAll:
-                Server.PrintToChatAll(message);
+                PrintToChatAll(cheatType, detail, false);
                 break;
             case ResultType.PrintAdmin:
-                List<CCSPlayerController> players = Utilities.GetPlayers();
-                foreach (CCSPlayerController admin in players)
-                {
-                    if (!AdminManager.PlayerHasPermissions(admin, "@css/ban"))
-                        continue;
-
-                    admin.PrintToChat(message);
-                }
+                PrintToChatAll(cheatType, detail, true);
                 break;
             case ResultType.Kick:
             case ResultType.Ban:
@@ -218,6 +231,42 @@ public class AntiCheat : BasePlugin, IPluginConfig<Config>
     public PlayerData? GetPlayerData(CCSPlayerController player)
     {
         return _playerData.TryGetValue(player.SteamID, out PlayerData? data) ? data : null;
+    }
+
+    public static void PrintToChatAll(CheatType cheatType, string detail, bool onlyAdmin)
+    {
+        List<CCSPlayerController> players = Utilities.GetPlayers();
+        foreach (CCSPlayerController player in players)
+        {
+            if (player.IsBot)
+                continue;
+            if (onlyAdmin && !AdminManager.PlayerHasPermissions(player, "@css/ban"))
+                continue;
+
+            player.PrintToChat(Instance.Localizer.ForPlayer(player, "Suspicious behavior detected", player.PlayerName, cheatType, detail));
+        }
+    }
+
+    private delegate nint CNetworkSystem_UpdatePublicIp(nint a1);
+    private CNetworkSystem_UpdatePublicIp? _networkSystemUpdatePublicIp;
+
+    private string GetServerIP()
+    {
+        nint _networkSystem = NativeAPI.GetValveInterface(0, "NetworkSystemVersion001");
+
+        unsafe
+        {
+            if (_networkSystemUpdatePublicIp == null)
+            {
+                nint funcPtr = *(nint*)(*(nint*)(_networkSystem) + 256);
+                _networkSystemUpdatePublicIp = Marshal.GetDelegateForFunctionPointer<CNetworkSystem_UpdatePublicIp>(funcPtr);
+            }
+
+            byte* ipBytes = (byte*)(_networkSystemUpdatePublicIp(_networkSystem) + 4);
+            string ip = $"{ipBytes[0]}.{ipBytes[1]}.{ipBytes[2]}.{ipBytes[3]}";
+
+            return ip;
+        }
     }
 }
 
