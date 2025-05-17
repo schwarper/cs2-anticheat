@@ -241,15 +241,10 @@ public class AntiCheat : BasePlugin, IPluginConfig<Config>
         foreach (CCSPlayerController player in players)
         {
             if (player.IsBot)
-            {
                 continue;
-            }
 
             if (onlyAdmin && !AdminManager.PlayerHasPermissions(player, "@css/ban"))
-            {
-                Server.PrintToChatAll($"OnlyAdmin->{onlyAdmin} && {player.PlayerName}");
                 continue;
-            }
 
             player.PrintToChat(Instance.Localizer.ForPlayer(player, "Suspicious behavior detected", playername, cheatType, detail));
         }
