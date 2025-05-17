@@ -1,4 +1,4 @@
-cs2-anticheat is an anti-cheat system in development for CounterStrike 2.
+cs2-anticheat is an anti-cheat system in development for CounterStrike 2. It lacks an Aimbot detector or something. I wanted to share it here because I don't have time. If anyone wants to develop it, you can contact me or send a PR.
 
 If you would like to donate or need assistance with the plugin, feel free to contact me via Discord, either privately or on my server.
 
