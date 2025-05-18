@@ -9,7 +9,7 @@ public class SpinbotDetector : ICheatDetector
 {
     public void Load() { }
     public void Unload() { }
-    public void OnWeaponFire(EventWeaponFire @event) { }
+    public void OnWeaponFire(CCSPlayerController player) { }
     public void OnPlayerDeath(CCSPlayerController victim, CCSPlayerController attacker)
     {
         if (Instance.GetPlayerData(attacker)?.Spinbot is not { } data)

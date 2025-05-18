@@ -12,10 +12,9 @@ public class RapidFireDetector : ICheatDetector
     public void OnPlayerDeath(CCSPlayerController victim, CCSPlayerController attacker) { }
     public void OnProcessUsercmds(CCSPlayerController player, QAngle angle) { }
 
-    public void OnWeaponFire(EventWeaponFire @event)
+    public void OnWeaponFire(CCSPlayerController player)
     {
-        if (@event.Userid is not CCSPlayerController player ||
-            Instance.GetPlayerData(player)?.RapidFire is not { } data)
+        if (Instance.GetPlayerData(player)?.RapidFire is not { } data)
             return;
 
         if (player.PlayerPawn.Value?.WeaponServices?.ActiveWeapon.Value?.GetVData<CCSWeaponBaseVData>() is not { } weaponData ||
@@ -35,6 +34,6 @@ public class RapidFireDetector : ICheatDetector
             }
         }
 
-        data.LastShotTick = Server.TickCount;
+        data.LastShotTick = tick;
     }
 }

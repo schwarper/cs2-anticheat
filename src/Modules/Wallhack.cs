@@ -17,7 +17,7 @@ public class WallhackDetector : ICheatDetector
         Instance.RemoveListener<CheckTransmit>(CheckTransmit);
     }
     public void OnPlayerDeath(CCSPlayerController victim, CCSPlayerController attacker) { }
-    public void OnWeaponFire(EventWeaponFire @event) { }
+    public void OnWeaponFire(CCSPlayerController player) { }
     public void OnProcessUsercmds(CCSPlayerController player, QAngle angle)
     {
         if (Instance.GetPlayerData(player)?.Wallhack is not { } playerData)

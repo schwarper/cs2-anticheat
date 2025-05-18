@@ -8,6 +8,6 @@ public interface ICheatDetector
     void Load();
     void Unload();
     void OnPlayerDeath(CCSPlayerController victim, CCSPlayerController attacker);
-    void OnWeaponFire(EventWeaponFire @event);
+    void OnWeaponFire(CCSPlayerController player);
     void OnProcessUsercmds(CCSPlayerController player, QAngle angle);
 }

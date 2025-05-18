@@ -156,8 +156,11 @@ public class AntiCheat : BasePlugin, IPluginConfig<Config>
     [GameEventHandler]
     public HookResult OnWeaponFire(EventWeaponFire @event, GameEventInfo info)
     {
+        if (@event.Userid is not CCSPlayerController player)
+            return HookResult.Continue;
+
         if (_detectors.TryGetValue(CheatType.RapidFire, out ICheatDetector? rapidDetector))
-            rapidDetector.OnWeaponFire(@event);
+            rapidDetector.OnWeaponFire(player);
 
         return HookResult.Continue;
     }

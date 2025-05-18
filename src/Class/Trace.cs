@@ -97,16 +97,6 @@ internal static class Address
     }
 }
 
-[StructLayout(LayoutKind.Explicit, Size = 0x35)]
-public unsafe struct Ray
-{
-    [FieldOffset(0)] public Vector3 Start;
-    [FieldOffset(0xC)] public Vector3 End;
-    [FieldOffset(0x18)] public Vector3 Mins;
-    [FieldOffset(0x24)] public Vector3 Maxs;
-    [FieldOffset(0x34)] public byte UnkType;
-}
-
 [StructLayout(LayoutKind.Explicit, Size = 0x44)]
 public unsafe struct TraceHitboxData
 {
@@ -127,28 +117,4 @@ public unsafe struct GameTrace
     [FieldOffset(0x9C)] public Vector3 Position;
     [FieldOffset(0xAC)] public float Fraction;
     [FieldOffset(0xB6)] public bool AllSolid;
-}
-
-[StructLayout(LayoutKind.Explicit, Size = 0x3a)]
-public unsafe struct TraceFilter
-{
-    [FieldOffset(0)] public void* Vtable;
-    [FieldOffset(0x8)] public ulong Mask;
-    [FieldOffset(0x20)] public fixed uint SkipHandles[4];
-    [FieldOffset(0x30)] public fixed ushort arrCollisions[2];
-    [FieldOffset(0x34)] public uint Unk1;
-    [FieldOffset(0x38)] public byte Unk2;
-    [FieldOffset(0x39)] public byte Unk3;
-}
-
-public unsafe struct TraceFilterV2
-{
-    public ulong Mask;
-    public fixed ulong V1[2];
-    public fixed uint SkipHandles[4];
-    public fixed ushort arrCollisions[2];
-    public short V2;
-    public byte V3;
-    public byte V4;
-    public byte V5;
 }

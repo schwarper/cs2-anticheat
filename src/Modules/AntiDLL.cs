@@ -23,7 +23,7 @@ public class AntiDLL : ICheatDetector
     }
 
     public void OnPlayerDeath(CCSPlayerController victim, CCSPlayerController attacker) { }
-    public void OnWeaponFire(EventWeaponFire @event) { }
+    public void OnWeaponFire(CCSPlayerController player) { }
     public void OnProcessUsercmds(CCSPlayerController player, QAngle angle) { }
 
     private HookResult OnIGameEventManager2_Init(DynamicHook hook)
