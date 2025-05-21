@@ -16,7 +16,7 @@ namespace AntiCheat;
 public class AntiCheat : BasePlugin, IPluginConfig<Config>
 {
     public override string ModuleName => "AntiCheat";
-    public override string ModuleVersion => "1.1";
+    public override string ModuleVersion => "1.2";
     public override string ModuleAuthor => "schwarper";
 
     public static AntiCheat Instance { get; set; } = new();
@@ -249,7 +249,7 @@ public class AntiCheat : BasePlugin, IPluginConfig<Config>
             if (onlyAdmin && !AdminManager.PlayerHasPermissions(player, "@css/ban"))
                 continue;
 
-            player.PrintToChat(Instance.Localizer.ForPlayer(player, "Suspicious behavior detected", playername, cheatType, detail));
+            player.PrintToChat(Instance.Config.Tag + Instance.Localizer.ForPlayer(player, "Suspicious behavior detected", playername, cheatType, detail));
         }
     }
 
