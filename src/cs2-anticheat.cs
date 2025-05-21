@@ -249,7 +249,7 @@ public class AntiCheat : BasePlugin, IPluginConfig<Config>
             if (onlyAdmin && !AdminManager.PlayerHasPermissions(player, "@css/ban"))
                 continue;
 
-            player.PrintToChat(Instance.Localizer.ForPlayer(player, "Suspicious behavior detected", playername, cheatType, detail));
+            player.PrintToChat(Instance.Config.Tag + Instance.Localizer.ForPlayer(player, "Suspicious behavior detected", playername, cheatType, detail));
         }
     }
 
