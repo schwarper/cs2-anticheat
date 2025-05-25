@@ -18,7 +18,7 @@ namespace AntiCheat;
 public class AntiCheat : BasePlugin, IPluginConfig<Config>
 {
     public override string ModuleName => "AntiCheat";
-    public override string ModuleVersion => "1.2";
+    public override string ModuleVersion => "1.3";
     public override string ModuleAuthor => "schwarper";
 
     public static AntiCheat Instance { get; set; } = new();
