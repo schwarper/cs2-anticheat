@@ -11,6 +11,9 @@
 
 	<ItemGroup>
 		<PackageReference Include="CounterStrikeSharp.API" Version="1.0.314" />
+		<Reference Include="CS2-SimpleAdminApi">
+			<HintPath>api/CS2-SimpleAdminApi</HintPath>
+		</Reference>
 	</ItemGroup>
 
 	<ItemGroup>
@@ -23,4 +26,9 @@
 		</ItemGroup>
 		<Copy SourceFiles="@(FilesToCopy)" DestinationFolder="BuildOutput\gamedata\" />
 	</Target>
+
+	<Target Name="Remove Api dlls" AfterTargets="Build">
+		<Delete Files="$(OutputPath)CS2-SimpleAdminApi.dll" />
+	</Target>
+
 </Project>
