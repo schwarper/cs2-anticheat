@@ -6,10 +6,12 @@ using CounterStrikeSharp.API.Modules.Admin;
 using CounterStrikeSharp.API.Modules.Memory.DynamicFunctions;
 using CounterStrikeSharp.API.Modules.Utils;
 using CounterStrikeSharp.API.ValveConstants.Protobuf;
+using CS2_SimpleAdminApi;
 using System.Runtime.InteropServices;
 using System.Text;
 using static AntiCheat.Hook_ProcessUsercmds;
 using Vector = CounterStrikeSharp.API.Modules.Utils.Vector;
+using CounterStrikeSharp.API.Modules.Entities;
 
 namespace AntiCheat;
 
@@ -24,6 +26,7 @@ public class AntiCheat : BasePlugin, IPluginConfig<Config>
     public ResultType ResultType { get; set; }
     private readonly Dictionary<ulong, PlayerData> _playerData = [];
     private readonly Dictionary<CheatType, ICheatDetector> _detectors = [];
+    private ICS2_SimpleAdminApi? _simpleAdminAPi;
 
     private readonly HashSet<CheatType> CheatTypesOnProcessUsercmds = [
         CheatType.Scroll,
@@ -58,6 +61,18 @@ public class AntiCheat : BasePlugin, IPluginConfig<Config>
             {
                 _playerData[player.SteamID] = new PlayerData();
             }
+        }
+    }
+
+    public override void OnAllPluginsLoaded(bool hotReload)
+    {
+        try
+        {
+            _simpleAdminAPi = ICS2_SimpleAdminApi.PluginCapability.Get();
+        }
+        catch (Exception)
+        {
+            
         }
     }
 
@@ -225,9 +240,10 @@ public class AntiCheat : BasePlugin, IPluginConfig<Config>
                     PrintToChatAll(player.PlayerName, cheatType, detail, true);
                     break;
                 case ResultType.Kick:
+                    player.Disconnect(NetworkDisconnectionReason.NETWORK_DISCONNECT_KICKED_VACNETABNORMALBEHAVIOR);
+                    break;
                 case ResultType.Ban:
-                    // TO DO ADD BAN
-                    player.Disconnect(NetworkDisconnectionReason.NETWORK_DISCONNECT_REJECT_BANNED);
+                    _simpleAdminAPi?.IssuePenalty(new SteamID(player.SteamID), null, PenaltyType.Ban, Instance.Localizer["Suspicious behavior detected", player.PlayerName, cheatType, detail], -1);
                     break;
             }
         });
