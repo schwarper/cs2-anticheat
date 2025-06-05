@@ -231,6 +231,8 @@ public class AntiCheat : BasePlugin, IPluginConfig<Config>
 
         Server.NextWorldUpdate(() =>
         {
+            var reason = Instance.Localizer["Suspicious behavior detected", player.PlayerName, cheatType, detail];
+            
             switch (ResultType)
             {
                 case ResultType.PrintAll:
@@ -243,7 +245,8 @@ public class AntiCheat : BasePlugin, IPluginConfig<Config>
                     player.Disconnect(NetworkDisconnectionReason.NETWORK_DISCONNECT_KICKED_VACNETABNORMALBEHAVIOR);
                     break;
                 case ResultType.Ban:
-                    _simpleAdminAPi?.IssuePenalty(new SteamID(player.SteamID), null, PenaltyType.Ban, Instance.Localizer["Suspicious behavior detected", player.PlayerName, cheatType, detail], -1);
+                    Server.ExecuteCommand($"mm_ban {player.UserId} 0 `{reason}`");
+                    _simpleAdminAPi?.IssuePenalty(new SteamID(player.SteamID), null, PenaltyType.Ban, reason, -1);
                     break;
             }
         });
