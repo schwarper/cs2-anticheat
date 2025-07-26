@@ -6,6 +6,7 @@ namespace AntiCheat;
 public class Config : BasePluginConfig
 {
     [JsonPropertyName("Tag")] public string Tag { get; set; } = "{red}[AC] ";
+    [JsonPropertyName("BanTimeSecond")] public int Time { get; set; } = 0;
     [JsonPropertyName("Type (PrintAll,PrintAdmin,Kick,Ban)")] public string Type { get; set; } = "PrintAdmin";
     [JsonPropertyName("DiscordWebhook")] public string DiscordWebhook { get; set; } = string.Empty;
     [JsonPropertyName("Modules")] public ModulesConfig Modules { get; set; } = new();

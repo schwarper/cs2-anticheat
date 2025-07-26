@@ -18,7 +18,7 @@ namespace AntiCheat;
 public class AntiCheat : BasePlugin, IPluginConfig<Config>
 {
     public override string ModuleName => "AntiCheat";
-    public override string ModuleVersion => "1.6";
+    public override string ModuleVersion => "1.7";
     public override string ModuleAuthor => "schwarper";
 
     public static AntiCheat Instance { get; set; } = new();
@@ -245,8 +245,8 @@ public class AntiCheat : BasePlugin, IPluginConfig<Config>
                     player.Disconnect(NetworkDisconnectionReason.NETWORK_DISCONNECT_KICKED_VACNETABNORMALBEHAVIOR);
                     break;
                 case ResultType.Ban:
-                    Server.ExecuteCommand($"mm_ban {player.UserId} 0 `{reason}`");
-                    _simpleAdminAPi?.IssuePenalty(new SteamID(player.SteamID), null, PenaltyType.Ban, reason, -1);
+                    Server.ExecuteCommand($"mm_ban {player.UserId} {Config.Time} `{reason}`");
+                    _simpleAdminAPi?.IssuePenalty(new SteamID(player.SteamID), null, PenaltyType.Ban, reason, Config.Time);
                     break;
             }
         });
