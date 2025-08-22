@@ -12,25 +12,26 @@ public class AntiDLL : ICheatDetector
 
     public void Load()
     {
-        IGameEventManager2.Init.Hook(OnIGameEventManager2_Init, HookMode.Pre);
+        nint addr = IGameEventManager2.Init();
+
+        if (addr == -1)
+        {
+            throw new Exception("Not found `CGameEventManager2`");
+        }
+
+        _gameEventManager = new(addr);
+
         CSource1LegacyGameEventGameSystem.ListenBitsReceived.Hook(OnSource1LegacyGameEventListenBitsReceived, HookMode.Pre);
     }
 
     public void Unload()
     {
         CSource1LegacyGameEventGameSystem.ListenBitsReceived.Unhook(OnSource1LegacyGameEventListenBitsReceived, HookMode.Pre);
-        IGameEventManager2.Init.Unhook(OnIGameEventManager2_Init, HookMode.Pre);
     }
 
     public void OnPlayerDeath(CCSPlayerController victim, CCSPlayerController attacker) { }
     public void OnWeaponFire(CCSPlayerController player) { }
     public void OnProcessUsercmds(CCSPlayerController player, QAngle angle) { }
-
-    private HookResult OnIGameEventManager2_Init(DynamicHook hook)
-    {
-        _gameEventManager = hook.GetParam<IGameEventManager2>(0);
-        return HookResult.Continue;
-    }
 
     private HookResult OnSource1LegacyGameEventListenBitsReceived(DynamicHook hook)
     {

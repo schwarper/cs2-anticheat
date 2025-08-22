@@ -1,12 +1,30 @@
 using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
+using CounterStrikeSharp.API.Modules.Memory;
 using CounterStrikeSharp.API.Modules.Memory.DynamicFunctions;
 
 namespace AntiCheat;
 
 public class IGameEventManager2(nint ptr) : NativeObject(ptr)
 {
-    public static readonly MemoryFunctionVoid<IGameEventManager2> Init = new(GameData.GetSignature("CGameEventManager_Init"));
+    public static unsafe nint Init()
+    {
+        nint addr = NativeAPI.FindSignature(Addresses.ServerPath, GameData.GetSignature("rel_GameEventManager"));
+
+        if (addr == nint.Zero)
+        {
+            return -1;
+        }
+
+        const int offset = 3;
+
+        nint rel32 = *(int*)(addr + offset);
+
+        addr += sizeof(int) + offset;
+        addr += rel32;
+
+        return *(nint*)addr;
+    }
 
     private static class VTable
     {
