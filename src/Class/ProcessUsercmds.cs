@@ -1,7 +1,7 @@
-﻿using CounterStrikeSharp.API.Core;
+﻿using System.Runtime.CompilerServices;
+using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Modules.Memory.DynamicFunctions;
 using CounterStrikeSharp.API.Modules.Utils;
-using System.Runtime.CompilerServices;
 
 namespace AntiCheat;
 

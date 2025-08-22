@@ -1,5 +1,5 @@
-using CounterStrikeSharp.API;
 using System.Runtime.InteropServices;
+using CounterStrikeSharp.API;
 
 namespace AntiCheat;
 

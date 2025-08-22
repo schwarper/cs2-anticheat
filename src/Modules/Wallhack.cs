@@ -188,7 +188,7 @@ public class WallhackDetector : ICheatDetector
         {
             X = (float)(Math.Cos(pitch) * Math.Cos(yaw)),
             Y = (float)(Math.Cos(pitch) * Math.Sin(yaw)),
-            Z = (float)(-Math.Sin(pitch))
+            Z = (float)-Math.Sin(pitch)
         };
     }
 
@@ -204,7 +204,7 @@ public class WallhackDetector : ICheatDetector
 
     private static void NormalizeVector(Vector v, out Vector result)
     {
-        float length = (float)Math.Sqrt(v.X * v.X + v.Y * v.Y + v.Z * v.Z);
+        float length = (float)Math.Sqrt((v.X * v.X) + (v.Y * v.Y) + (v.Z * v.Z));
         result = length != 0
             ? new Vector
             {
@@ -222,7 +222,7 @@ public class WallhackDetector : ICheatDetector
 
     private static float GetVectorDotProduct(Vector v1, Vector v2)
     {
-        return v1.X * v2.X + v1.Y * v2.Y + v1.Z * v2.Z;
+        return (v1.X * v2.X) + (v1.Y * v2.Y) + (v1.Z * v2.Z);
     }
 
     private static void ScaleVector(Vector v, float scale, out Vector result)

@@ -58,9 +58,9 @@ public static class QAngleExtensions
 
     private static void Normalize(this QAngle angle)
     {
-        angle.X = (angle.X + 180.0f) % 360.0f - 180.0f;
-        angle.Y = (angle.Y + 180.0f) % 360.0f - 180.0f;
-        angle.Z = (angle.Z + 180.0f) % 360.0f - 180.0f;
+        angle.X = ((angle.X + 180.0f) % 360.0f) - 180.0f;
+        angle.Y = ((angle.Y + 180.0f) % 360.0f) - 180.0f;
+        angle.Z = ((angle.Z + 180.0f) % 360.0f) - 180.0f;
     }
 
     private static bool IsReasonable(this QAngle q)

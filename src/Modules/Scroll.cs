@@ -35,7 +35,7 @@ public class BunnyHopDetector : ICheatDetector
 
         PlayerButtons buttons = player.Buttons;
         Vector velocity = playerPawn.AbsVelocity;
-        float speed = (float)Math.Sqrt(velocity.X * velocity.X + velocity.Y * velocity.Y);
+        float speed = (float)Math.Sqrt((velocity.X * velocity.X) + (velocity.Y * velocity.Y));
 
         if (speed > 225.0f)
             CollectJumpStats(player, data, onGround, buttons, velocity.Z);
@@ -73,7 +73,7 @@ public class BunnyHopDetector : ICheatDetector
         if (buttonState == State.Pressing)
         {
             data.TempStats[(int)Stats.Scrolls]++;
-            data.TempStats[(int)Stats.AverageTicks] += (tickCount - data.ReleaseTick);
+            data.TempStats[(int)Stats.AverageTicks] += tickCount - data.ReleaseTick;
 
             if (onGround)
             {

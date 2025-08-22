@@ -1,8 +1,8 @@
-﻿using CounterStrikeSharp.API.Core;
+﻿using System.Numerics;
+using System.Runtime.InteropServices;
+using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Modules.Memory;
 using CounterStrikeSharp.API.Modules.Utils;
-using System.Numerics;
-using System.Runtime.InteropServices;
 using Vector = CounterStrikeSharp.API.Modules.Utils.Vector;
 
 namespace AntiCheat;
@@ -30,7 +30,7 @@ public class Trace()
         Vector _forward = new();
 
         NativeAPI.AngleVectors(viewangles.Handle, _forward.Handle, 0, 0);
-        Vector _endOrigin = new(origin.X + _forward.X * 8192, origin.Y + _forward.Y * 8192, origin.Z + _forward.Z * 8192);
+        Vector _endOrigin = new(origin.X + (_forward.X * 8192), origin.Y + (_forward.Y * 8192), origin.Z + (_forward.Z * 8192));
 
         return TraceShape(origin, _endOrigin);
     }
@@ -82,7 +82,7 @@ public class Trace()
 
 internal static class Address
 {
-    static unsafe public nint GetAbsoluteAddress(nint addr, nint offset, int size)
+    public static unsafe nint GetAbsoluteAddress(nint addr, nint offset, int size)
     {
         if (addr == IntPtr.Zero)
             throw new Exception("Failed to find RayTrace signature.");
@@ -91,7 +91,7 @@ internal static class Address
         return addr + code + size;
     }
 
-    static public nint GetCallAddress(nint a)
+    public static nint GetCallAddress(nint a)
     {
         return GetAbsoluteAddress(a, 1, 5);
     }

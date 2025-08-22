@@ -62,7 +62,7 @@ public class SpinbotDetector : ICheatDetector
     {
         float deltaX = NormalizeAngle(a.X - b.X);
         float deltaY = NormalizeAngle(a.Y - b.Y);
-        return (float)Math.Sqrt(deltaX * deltaX + deltaY * deltaY);
+        return (float)Math.Sqrt((deltaX * deltaX) + (deltaY * deltaY));
     }
 
     private static float NormalizeAngle(float angle)

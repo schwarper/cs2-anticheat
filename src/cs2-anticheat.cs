@@ -1,24 +1,24 @@
-﻿using CounterStrikeSharp.API;
+﻿using System.Runtime.InteropServices;
+using System.Text;
+using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Core.Attributes.Registration;
 using CounterStrikeSharp.API.Core.Translations;
 using CounterStrikeSharp.API.Modules.Admin;
+using CounterStrikeSharp.API.Modules.Entities;
 using CounterStrikeSharp.API.Modules.Memory.DynamicFunctions;
 using CounterStrikeSharp.API.Modules.Utils;
 using CounterStrikeSharp.API.ValveConstants.Protobuf;
 using CS2_SimpleAdminApi;
-using System.Runtime.InteropServices;
-using System.Text;
 using static AntiCheat.Hook_ProcessUsercmds;
 using Vector = CounterStrikeSharp.API.Modules.Utils.Vector;
-using CounterStrikeSharp.API.Modules.Entities;
 
 namespace AntiCheat;
 
 public class AntiCheat : BasePlugin, IPluginConfig<Config>
 {
     public override string ModuleName => "AntiCheat";
-    public override string ModuleVersion => "1.7";
+    public override string ModuleVersion => "1.8";
     public override string ModuleAuthor => "schwarper";
 
     public static AntiCheat Instance { get; set; } = new();
@@ -72,7 +72,7 @@ public class AntiCheat : BasePlugin, IPluginConfig<Config>
         }
         catch (Exception)
         {
-            
+
         }
     }
 
@@ -231,8 +231,8 @@ public class AntiCheat : BasePlugin, IPluginConfig<Config>
 
         Server.NextWorldUpdate(() =>
         {
-            var reason = Instance.Localizer["Suspicious behavior detected", player.PlayerName, cheatType, detail];
-            
+            Microsoft.Extensions.Localization.LocalizedString reason = Instance.Localizer["Suspicious behavior detected", player.PlayerName, cheatType, detail];
+
             switch (ResultType)
             {
                 case ResultType.PrintAll:
@@ -283,7 +283,7 @@ public class AntiCheat : BasePlugin, IPluginConfig<Config>
         {
             if (_networkSystemUpdatePublicIp == null)
             {
-                nint funcPtr = *(nint*)(*(nint*)(_networkSystem) + 256);
+                nint funcPtr = *(nint*)(*(nint*)_networkSystem + 256);
                 _networkSystemUpdatePublicIp = Marshal.GetDelegateForFunctionPointer<CNetworkSystem_UpdatePublicIp>(funcPtr);
             }
 
