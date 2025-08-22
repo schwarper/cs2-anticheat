@@ -18,7 +18,7 @@ namespace AntiCheat;
 public class AntiCheat : BasePlugin, IPluginConfig<Config>
 {
     public override string ModuleName => "AntiCheat";
-    public override string ModuleVersion => "1.8";
+    public override string ModuleVersion => "1.9";
     public override string ModuleAuthor => "schwarper";
 
     public static AntiCheat Instance { get; set; } = new();
@@ -403,3 +403,4 @@ public enum Stats
     PerfectJump,
     Size
 }
+

@@ -5,7 +5,7 @@ namespace AntiCheat;
 
 public class CLCMsg_ListenEvents(nint ptr) : NativeObject(ptr)
 {
-    private unsafe CPlayerSlot Slot => Marshal.PtrToStructure<CPlayerSlot>(Handle + 80);
+    private unsafe CPlayerSlot Slot => Marshal.PtrToStructure<CPlayerSlot>(Handle + 88);
     public CPlayerSlot GetPlayerSlot()
     {
         return Slot;
