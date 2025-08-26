@@ -24,7 +24,7 @@ namespace AntiCheat;
 public class AntiCheat : BasePlugin, IPluginConfig<Config>
 {
     public override string ModuleName => "AntiCheat";
-    public override string ModuleVersion => "1.10";
+    public override string ModuleVersion => "1.11";
     public override string ModuleAuthor => "schwarper";
 
     public static AntiCheat Instance { get; private set; } = new();
@@ -141,7 +141,7 @@ public class AntiCheat : BasePlugin, IPluginConfig<Config>
     {
         if (@event.Userid is not CCSPlayerController victim ||
             @event.Attacker is not CCSPlayerController attacker ||
-            victim == attacker)
+            victim == attacker || attacker.IsBot)
             return HookResult.Continue;
 
         if (_detectors.TryGetValue(CheatType.Spinbot, out ICheatDetector? spinbotDetector))
@@ -155,7 +155,7 @@ public class AntiCheat : BasePlugin, IPluginConfig<Config>
     [GameEventHandler]
     public HookResult OnWeaponFire(EventWeaponFire @event, GameEventInfo _)
     {
-        if (@event.Userid is not CCSPlayerController player)
+        if (@event.Userid is not CCSPlayerController player || player.IsBot)
             return HookResult.Continue;
 
         if (_detectors.TryGetValue(CheatType.RapidFire, out ICheatDetector? rapidDetector))
