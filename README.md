@@ -10,6 +10,13 @@ Discord link : [Discord server](https://discord.gg/4zQfUzjk36)
 - [ ] Adding Aimbot-style detectors
 - [ ] Anti Wallhack should be well tested. Thanks to Valve, players crash all the time. Not recommended for use at this time.
 
+# Prerequisites
+This plugin requires the following dependency:
+
+➡ [CS2TraceRay](https://github.com/schwarper/CS2TraceRay)
+
+Make sure to install this dependency before proceeding.
+
 # References
 ## This project was prepared with the help of the following sources.
 * `AntiDLL` => [AntiDLL](https://github.com/KillStr3aK/CS2-AntiDLL) by [KillStr3aK](https://github.com/KillStr3aK)
