@@ -8,8 +8,6 @@ Discord link : [Discord server](https://discord.gg/4zQfUzjk36)
 
 # TO DO
 - [ ] Adding Aimbot-style detectors
-- [ ] Anti-DLLL should be tested. Sometimes it gives false alarms.
-- [ ] Ban system should be added. False alarms need to be minimized first.
 - [ ] Anti Wallhack should be well tested. Thanks to Valve, players crash all the time. Not recommended for use at this time.
 
 # References

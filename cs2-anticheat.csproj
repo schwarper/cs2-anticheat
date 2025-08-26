@@ -11,24 +11,24 @@
 
 	<ItemGroup>
 		<PackageReference Include="CounterStrikeSharp.API" Version="1.0.337" />
-		<Reference Include="CS2-SimpleAdminApi">
-			<HintPath>api/CS2-SimpleAdminApi</HintPath>
-		</Reference>
+		<PackageReference Include="CS2TraceRay" Version="1.0.7" />
 	</ItemGroup>
 
 	<ItemGroup>
 		<None Update="lang\**\*.*" CopyToOutputDirectory="PreserveNewest" />
 	</ItemGroup>
 
-	<Target Name="CopyConfigFiles" AfterTargets="Build">
+	<Target Name="CopyGameData" AfterTargets="Build">
 		<ItemGroup>
-			<FilesToCopy Include="cs2-anticheat.gamedata.json" />
+			<FileToCopy Include="cs2-anticheat.gamedata.json" />
 		</ItemGroup>
-		<Copy SourceFiles="@(FilesToCopy)" DestinationFolder="BuildOutput\gamedata\" />
+		<Copy SourceFiles="@(FileToCopy)" DestinationFolder="BuildOutput\gamedata\" />
 	</Target>
 
-	<Target Name="Remove Api dlls" AfterTargets="Build">
-		<Delete Files="$(OutputPath)CS2-SimpleAdminApi.dll" />
+	<Target Name="CopyConfig" AfterTargets="Build">
+		<ItemGroup>
+			<FilesToCopy Include="cs2-anticheat.toml" />
+		</ItemGroup>
+		<Copy SourceFiles="@(FilesToCopy)" DestinationFolder="BuildOutput\configs\plugins\cs2-anticheat\" />
 	</Target>
-
 </Project>

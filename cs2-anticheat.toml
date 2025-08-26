@@ -1,0 +1,93 @@
+# The prefix
+Tag = "{red}[AC] "
+
+# The duration of the ban in seconds when a cheater is detected.
+# Set to 0 for a permanent ban.
+BanTimeSecond = 0
+
+# The action to take when a cheat is detected.
+# Valid options: "PrintAll", "PrintAdmin", "Kick", "Ban".
+"Type (PrintAll,PrintAdmin,Kick,Ban)" = "PrintAdmin"
+
+# The Discord webhook URL to send cheat detection notifications to.
+# Leave empty to disable Discord notifications.
+DiscordWebhook = ""
+
+[Modules]
+
+    # Settings for the Rapid Fire detection module.
+    [Modules.RapidFire]
+    # Set to true to enable this detection module, false to disable it.
+    Enabled = true
+    # The number of suspicious shots a player can make before being flagged. Higher values are less strict.
+    MaxSuspicion = 3
+
+    # Settings for the Bunny Hop (Scroll) detection module.
+    [Modules.Scroll]
+    # Set to true to enable this detection module, false to disable it.
+    Enabled = true
+    # The minimum number of jumps to analyze for bunny hop patterns.
+    SampleSizeMin = 45
+    # The maximum number of jumps to analyze. A random sample size between min and max will be used for each player.
+    SampleSizeMax = 55
+
+    # Settings for the Silent Aim detection module.
+    [Modules.SilentAim]
+    # Set to true to enable this detection module, false to disable it.
+    Enabled = true
+    # The number of suspicious kills a player can get before being flagged.
+    MaxSuspicion = 5
+    # The maximum angle difference (in degrees) allowed between a player's aim and the victim at the time of a kill.
+    AngleThreshold = 50.0
+
+    # Settings for the Spinbot detection module.
+    [Modules.Spinbot]
+    # Set to true to enable this detection module, false to disable it.
+    Enabled = true
+    # The number of suspicious flicks/spins a player can perform before being flagged.
+    MaxSuspicion = 5
+    # The maximum rotational speed (in degrees per second) a player's view can move.
+    AngularSpeedThreshold = 4000.0
+    # The minimum angle change required to trigger a spinbot check. Prevents flagging players who are standing still or moving their mouse slowly.
+    MinimumAngleChange = 5.0
+
+    # Settings for the Teleport / Invalid Angle detection module.
+    [Modules.Teleport]
+    # Set to true to enable this detection module, false to disable it.
+    Enabled = true
+    # The number of times a player can send invalid view angles before being flagged.
+    MaxSuspicion = 5
+
+    # Settings for the Wallhack prevention module.
+    # This module actively blocks players from seeing others through walls, rather than detecting and banning.
+    [Modules.Wallhack]
+    # Set to true to enable this prevention module, false to disable it. Note: This can have a performance impact.
+    Enabled = true
+
+    # Settings for the Anti-DLL / Event Listener detection module.
+    [Modules.AntiDLL]
+    # Set to true to enable this detection module, false to disable it.
+    Enabled = true
+    # A list of game events. If a player's client listens to these events, they are flagged.
+    # These events are typically used by internal cheats and not by the normal game client.
+    Blacklist = [
+        "gameui_hidden", "player_chat", "player_score", "player_shoot", "game_init",
+        "game_start", "game_end", "warmup_end", "dm_bonus_weapon_start", "survival_announce_phase",
+        "break_prop", "player_decal", "reset_game_titledata", "endmatch_mapvote_selecting_map",
+        "endmatch_cmm_start_reveal_items", "inventory_updated", "client_loadout_changed",
+        "add_player_sonar_icon", "other_death", "bullet_damage", "hostage_rescued_all",
+        "hostage_call_for_help", "vip_escaped", "vip_killed", "player_radio",
+        "weapon_fire_on_empty", "silencer_detach", "inspect_weapon", "player_spawned",
+        "item_pickup_slerp", "item_pickup_failed", "item_remove", "enter_rescue_zone",
+        "exit_rescue_zone", "silencer_off", "silencer_on", "round_prestart",
+        "round_poststart", "grenade_bounce", "molotov_detonate", "tagrenade_detonate",
+        "inferno_extinguish", "decoy_firing", "bullet_impact", "player_footstep",
+        "player_jump", "player_blind", "player_falldamage", "mb_input_lock_success",
+        "mb_input_lock_cancel", "nav_blocked", "nav_generate", "achievement_info_loaded",
+        "hltv_changed_mode", "show_deathpanel", "hide_deathpanel", "player_avenged_teammate",
+        "achievement_earned_local", "repost_xbox_achievements", "match_end_conditions",
+        "write_profile_data", "trial_time_expired", "update_matchmaking_stats",
+        "enable_restart_voting", "sfuievent", "teamchange_pending", "material_default_complete",
+        "cs_prev_next_spectator", "tournament_reward", "start_halftime", "ammo_refill",
+        "parachute_pickup", "parachute_deploy"
+    ]

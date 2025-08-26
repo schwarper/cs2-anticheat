@@ -14,32 +14,16 @@
         }
     },
     "IGameEventManager2::FindListener": {
-        "_search": "can be found in vtable",
-        "signatures": {
-            "library": "server",
-            "windows": "48 89 5C 24 ? 48 89 6C 24 ? 56 57 41 56 48 83 EC ? 49 8B E8 48 8D 99",
-            "linux": "55 48 89 E5 41 56 49 89 D6 41 55 49 89 F5 41 54 4C 8D A7"
-        }
-    },
-    "TraceFunc": {
-        "signatures": {
-            "library": "server",
-            "windows": "4C 8B DC 49 89 5B ? 49 89 6B ? 49 89 73 ? 57 41 56 41 57 48 81 EC",
-            "linux": "48 B8 ? ? ? ? ? ? ? ? 55 66 0F EF C0 48 89 E5 41 57 41 56 49 89 D6"
-        }
-    },
-    "GameTraceManager": {
-        "signatures": {
-            "library": "server",
-            "windows": "48 8B 0D ? ? ? ? 0C",
-            "linux": "4C 8D 05 ? ? ? ? BB"
+        "offsets": {
+            "windows": 4,
+            "linux": 5
         }
     },
     "ProcessUsercmds": {
         "signatures": {
             "library": "server",
             "windows": "48 8B C4 44 88 48 20 44 89 40 18 48 89 50 10 53",
-            "linux": "55 48 89 E5 41 57 41 56 41 55 41 54 53 48 89 FB 48 83 EC 2A 89 4D"
+            "linux": "55 48 89 E5 41 57 41 56 41 55 41 54 53 48 89 FB 48 83 EC ? 89 4D"
         }
     },
     "rel_GameEventManager": {
