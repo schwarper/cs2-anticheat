@@ -1,4 +1,4 @@
-﻿using System.Text.Json.Serialization;
+using System.Text.Json.Serialization;
 using CounterStrikeSharp.API.Core;
 
 namespace AntiCheat.Class;
@@ -9,7 +9,19 @@ public class Config : BasePluginConfig
     [JsonPropertyName("BanTimeSecond")] public int Time { get; set; } = 0;
     [JsonPropertyName("Type (PrintAll,PrintAdmin,Kick,Ban)")] public string Type { get; set; } = "PrintAdmin";
     [JsonPropertyName("DiscordWebhook")] public string DiscordWebhook { get; set; } = string.Empty;
+    [JsonPropertyName("WebhookEmbed")] public WebhookConfig Webhook { get; set; } = new();
     [JsonPropertyName("Modules")] public ModulesConfig Modules { get; set; } = new();
+
+    public class WebhookConfig
+    {
+        [JsonPropertyName("Title")] public string Title { get; set; } = "🚨 Cheat Detected";
+        [JsonPropertyName("Color")] public string ColorHex { get; set; } = "#FF0000";
+        [JsonPropertyName("Footer")] public string Footer { get; set; } = "AntiCheat System";
+        [JsonPropertyName("Username")] public string Username { get; set; } = "AntiCheat Bot";
+        [JsonPropertyName("AvatarUrl")] public string AvatarUrl { get; set; } = "";
+        [JsonPropertyName("ThumbnailUrl")] public string ThumbnailUrl { get; set; } = "";
+        [JsonPropertyName("ImageUrl")] public string ImageUrl { get; set; } = "";
+    }
 
     public class ModulesConfig
     {
