@@ -1,4 +1,4 @@
-﻿using AntiCheat.Class;
+using AntiCheat.Class;
 using AntiCheat.Enum;
 using AntiCheat.Interface;
 using CounterStrikeSharp.API.Core;
@@ -25,6 +25,8 @@ public class SilentAim : ICheatDetector
     public void OnProcessUsercmds(CCSPlayerController player, QAngle angle)
     {
         SilentAimData data = PlayerData.Get(player).SilentAim;
+
+      
         if (data.RecentlyKilled)
         {
             if (!IsLookingAtPlayer(player, data.Victim!, angle))
@@ -39,6 +41,48 @@ public class SilentAim : ICheatDetector
             }
             data.RecentlyKilled = false;
         }
+
+        // -------------------------
+        // Recoil & Spread Detection
+        // -------------------------
+        TrackRecoilSpread(player, angle, data);
+    }
+
+    private static void TrackRecoilSpread(CCSPlayerController player, QAngle eyeAngle, SilentAimData data)
+    {
+        Vector currentForward = AngleToForward(eyeAngle);
+
+        if (data.RecentShots == null)
+            data.RecentShots = new List<Vector>();
+
+        data.RecentShots.Add(currentForward);
+
+        if (data.RecentShots.Count > 20)
+            data.RecentShots.RemoveAt(0);
+
+        if (data.RecentShots.Count >= 5)
+        {
+            float totalDeviation = 0f;
+            for (int i = 1; i < data.RecentShots.Count; i++)
+            {
+                totalDeviation += AngleBetweenVectors(data.RecentShots[i - 1], data.RecentShots[i]);
+            }
+
+            float averageDeviation = totalDeviation / (data.RecentShots.Count - 1);
+
+          
+            if (averageDeviation < Instance.Config.Modules.SilentAim.RecoilSpreadThreshold)
+            {
+                Instance.OnPlayerDetected(player, CheatType.SilentAim);
+                data.RecentShots.Clear();
+            }
+        }
+    }
+
+    private static float AngleBetweenVectors(Vector a, Vector b)
+    {
+        float dot = Dot(a, b);
+        return MathF.Acos(Math.Clamp(dot, -1f, 1f)) * (180f / MathF.PI);
     }
 
     private static bool IsLookingAtPlayer(CCSPlayerController player, CCSPlayerController target, QAngle eyeAngle)
