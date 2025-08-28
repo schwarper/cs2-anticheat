@@ -172,7 +172,7 @@ public class AntiCheat : BasePlugin, IPluginConfig<Config>
     {
         if (!string.IsNullOrEmpty(detail))
         {
-    detail = $" ({detail})";
+            detail = $" ({detail})";
         }
 
     if (!string.IsNullOrWhiteSpace(Config.DiscordWebhook))
@@ -187,7 +187,6 @@ public class AntiCheat : BasePlugin, IPluginConfig<Config>
                 description,
                 Config.Webhook.Title
             ));
-        
     }
 
         Server.NextWorldUpdate(() =>
