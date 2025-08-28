@@ -172,27 +172,23 @@ public class AntiCheat : BasePlugin, IPluginConfig<Config>
     {
         if (!string.IsNullOrEmpty(detail))
         {
-            detail = $" ({detail})";
+    detail = $" ({detail})";
         }
 
-        if (!string.IsNullOrWhiteSpace(Config.DiscordWebhook))
-        {
-            StringBuilder messageBuilder = new StringBuilder()
-                .AppendLine("```")
-                .AppendLine($"Server IP: {ServerIP.Get()}")
-                .AppendLine($"Player: {player.PlayerName}")
-                .AppendLine($"SteamID: {player.SteamID}")
-                .AppendLine($"Cheat Type: {cheatType}");
-
-            if (!string.IsNullOrWhiteSpace(detail))
-            {
-                messageBuilder.AppendLine($"Details: {detail}");
-            }
-
-            messageBuilder.AppendLine("```");
-
-            _ = Task.Run(() => DiscordNotifier.SendDiscordAsync(messageBuilder.ToString()));
-        }
+    if (!string.IsNullOrWhiteSpace(Config.DiscordWebhook))
+    {
+            string description =
+                $"**Server IP:** {ServerIP.Get()}\n" +
+                $"**Player:** {player.PlayerName}\n" +
+                $"**SteamID:** {player.SteamID}\n" +
+                $"**Cheat Type:** {cheatType}{detail}";
+        
+            _ = Task.Run(() => DiscordNotifier.SendDiscordEmbedAsync(
+                description,
+                Config.Webhook.Title
+            ));
+        
+    }
 
         Server.NextWorldUpdate(() =>
         {
