@@ -24,7 +24,7 @@ namespace AntiCheat;
 public class AntiCheat : BasePlugin, IPluginConfig<Config>
 {
     public override string ModuleName => "AntiCheat";
-    public override string ModuleVersion => "1.12";
+    public override string ModuleVersion => "1.13";
     public override string ModuleAuthor => "schwarper";
 
     public static AntiCheat Instance { get; private set; } = new();
@@ -175,24 +175,19 @@ public class AntiCheat : BasePlugin, IPluginConfig<Config>
             detail = $" ({detail})";
         }
 
-        if (!string.IsNullOrWhiteSpace(Config.DiscordWebhook))
-        {
-            StringBuilder messageBuilder = new StringBuilder()
-                .AppendLine("```")
-                .AppendLine($"Server IP: {ServerIP.Get()}")
-                .AppendLine($"Player: {player.PlayerName}")
-                .AppendLine($"SteamID: {player.SteamID}")
-                .AppendLine($"Cheat Type: {cheatType}");
-
-            if (!string.IsNullOrWhiteSpace(detail))
-            {
-                messageBuilder.AppendLine($"Details: {detail}");
-            }
-
-            messageBuilder.AppendLine("```");
-
-            _ = Task.Run(() => DiscordNotifier.SendDiscordAsync(messageBuilder.ToString()));
-        }
+    if (!string.IsNullOrWhiteSpace(Config.DiscordWebhook))
+    {
+            string description =
+                $"**Server IP:** {ServerIP.Get()}\n" +
+                $"**Player:** {player.PlayerName}\n" +
+                $"**SteamID:** {player.SteamID}\n" +
+                $"**Cheat Type:** {cheatType}{detail}";
+        
+            _ = Task.Run(() => DiscordNotifier.SendDiscordEmbedAsync(
+                description,
+                Config.Webhook.Title
+            ));
+    }
 
         Server.NextWorldUpdate(() =>
         {
