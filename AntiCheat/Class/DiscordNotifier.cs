@@ -13,15 +13,8 @@ public static class DiscordNotifier
         var config = Instance.Config.Webhook;
 
         int color;
-        try
-        {
-            color = int.Parse(config.ColorHex.Replace("#", ""), System.Globalization.NumberStyles.HexNumber);
-        }
-        catch
-        {
-            color = 16711680;
-        }
-
+        color = int.Parse(config.ColorHex.Replace("#", ""), System.Globalization.NumberStyles.HexNumber);
+       
         var embed = new Dictionary<string, object?>
         {
             ["title"] = string.IsNullOrWhiteSpace(title) ? config.Title : title,
